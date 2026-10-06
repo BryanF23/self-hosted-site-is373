@@ -1,0 +1,44 @@
+services:
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./app
+    container_name: flask-app
+    environment:
+      DB_HOST: db
+      DB_NAME: selfhosted
+      DB_USER: bryan
+      DB_PASSWORD: ${DB_PASSWORD}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.flask.entrypoints=web"
+      - "traefik.http.services.flask.loadbalancer.server.port=5000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: selfhosted
+      POSTGRES_USER: bryan
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
