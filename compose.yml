@@ -20,6 +20,7 @@ services:
       DB_NAME: selfhosted
       DB_USER: bryan
       DB_PASSWORD: ${DB_PASSWORD}
+      APP_ENV: ${APP_ENV}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.flask.rule=PathPrefix(`/`)"

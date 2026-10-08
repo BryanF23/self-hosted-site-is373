@@ -21,6 +21,7 @@ def check_database():
 
 @app.route("/")
 def home():
+    environment = os.getenv("APP_ENV", "Production")
     db_status = "Connected" if check_database() else "Not Connected"
 
     return f"""
@@ -33,6 +34,7 @@ def home():
             <p>This website is running on a DigitalOcean Droplet.</p>
             <p>Powered by Python, Flask, Docker, and Traefik.</p>
             <p>PostgreSQL Database: <strong>{db_status}</strong></p>
+            <p>Environment: <strong>{environment}</strong></p>
         </body>
     </html>
     """
