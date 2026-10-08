@@ -1,7 +1,7 @@
 # Bryan's Self-Hosted Site
 
 - **Production:** [http://bryanfselfhosted.xyz](http://bryanfselfhosted.xyz)
-- **QA:** https://qa.bryanfselfhosted.xyz
+- **QA:** qa.bryanfselfhosted.xyz
 
 Runs on a DigitalOcean Droplet with Flask, Docker, PostgreSQL, and Traefik.
 
