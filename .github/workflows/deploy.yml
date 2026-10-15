@@ -1,4 +1,4 @@
-
+```yaml
 name: Build and Publish Website
 
 on:
@@ -44,5 +44,4 @@ jobs:
           context: ./app
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-
+            ghcr.io/bryanf23/self-hosted-site-is373:${{ github.sha }}
