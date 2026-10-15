@@ -1,4 +1,3 @@
-
 services:
   traefik:
     image: traefik:v3.6
@@ -15,8 +14,7 @@ services:
     restart: unless-stopped
 
   web:
-    build:
-      context: ./app
+    image: ghcr.io/bryanf23/self-hosted-site-is373:${IMAGE_TAG:-latest}
     container_name: flask-app
     environment:
       DB_HOST: db
@@ -47,8 +45,7 @@ services:
     restart: unless-stopped
 
   qa-web:
-    build:
-      context: ./app
+    image: ghcr.io/bryanf23/self-hosted-site-is373:${IMAGE_TAG:-latest}
     container_name: flask-app-qa
     environment:
       DB_HOST: qa-db
