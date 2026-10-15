@@ -1,3 +1,4 @@
+
 services:
   traefik:
     image: traefik:v3.6
@@ -6,9 +7,11 @@ services:
       - "--configFile=/etc/traefik/traefik.yml"
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./letsencrypt:/letsencrypt
     restart: unless-stopped
 
   web:
@@ -20,11 +23,13 @@ services:
       DB_NAME: selfhosted
       DB_USER: bryan
       DB_PASSWORD: ${DB_PASSWORD}
-      APP_ENV: ${APP_ENV}
+      APP_ENV: Production
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.flask.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.flask.entrypoints=web"
+      - "traefik.http.routers.flask.rule=Host(`bryanfselfhosted.xyz`)"
+      - "traefik.http.routers.flask.entrypoints=websecure"
+      - "traefik.http.routers.flask.tls=true"
+      - "traefik.http.routers.flask.tls.certresolver=letsencrypt"
       - "traefik.http.services.flask.loadbalancer.server.port=5000"
     depends_on:
       - db
@@ -41,5 +46,38 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  qa-web:
+    build:
+      context: ./app
+    container_name: flask-app-qa
+    environment:
+      DB_HOST: qa-db
+      DB_NAME: selfhosted_qa
+      DB_USER: bryanqa
+      DB_PASSWORD: ${QA_DB_PASSWORD}
+      APP_ENV: QA
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask-qa.rule=Host(`qa.bryanfselfhosted.xyz`)"
+      - "traefik.http.routers.flask-qa.entrypoints=websecure"
+      - "traefik.http.routers.flask-qa.tls=true"
+      - "traefik.http.routers.flask-qa.tls.certresolver=letsencrypt"
+      - "traefik.http.services.flask-qa.loadbalancer.server.port=5000"
+    depends_on:
+      - qa-db
+    restart: unless-stopped
+
+  qa-db:
+    image: postgres:16
+    container_name: postgres-db-qa
+    environment:
+      POSTGRES_DB: selfhosted_qa
+      POSTGRES_USER: bryanqa
+      POSTGRES_PASSWORD: ${QA_DB_PASSWORD}
+    volumes:
+      - qa_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  qa_postgres_data:
